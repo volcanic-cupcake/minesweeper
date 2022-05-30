@@ -1,5 +1,7 @@
 package minesweeper;
 
+import javax.swing.ImageIcon;
+
 public class Cell {
 
 	enum CellType {
@@ -14,7 +16,9 @@ public class Cell {
 	private int y;
 	private Button button = new Button();
 	private CellType type = null;
+	private ImageIcon revealedIcon = null;
 	private int value = 0;
+	private boolean isFlagged = false;
 	
 	public Cell(int x, int y) {
 		this.x = x;
@@ -40,8 +44,14 @@ public class Cell {
 	public CellType type() {
 		return this.type;
 	}
+	public ImageIcon revealedIcon() {
+		return this.revealedIcon;
+	}
 	public int value() {
 		return this.value;
+	}
+	public boolean isFlagged() {
+		return this.isFlagged;
 	}
 	public Button button() {
 		return this.button;
@@ -62,8 +72,17 @@ public class Cell {
 			break;
 		}
 	}
+	public void setRevealedIcon(ImageIcon revealedIcon) {
+		this.revealedIcon = revealedIcon;
+	}
 	public void setValue(int value) {
 		this.value = value;
+	}
+	public void setIsFlagged(boolean isFlagged) {
+		this.isFlagged = isFlagged;
+	}
+	public void toggleIsFlagged() {
+		this.isFlagged = isFlagged() ? false : true;
 	}
 	public boolean isMine() {
 		return this.type == CellType.mine;

@@ -2,9 +2,16 @@ package minesweeper;
 
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import minesweeper.Cell.CellType;
 
@@ -46,22 +53,60 @@ public class Map {
 		return null;
 	}
 	public void generate(Cell startingCell) {
-		Frame frame = new Frame();
+		JPanel panel = new JPanel();
+		int[] panelSize = calculatePanelSize();
+		panel.setLayout(new GridLayout(this.height, this.width, 5, 5));
+		panel.setBounds(25, 25, panelSize[0], panelSize[1]);
 		
 		cells = new ArrayList<Cell>();
 		for (int y = 0; y < this.height; y++) {
 			for (int x = 0; x < this.width; x++) {
 				Cell cell = new Cell(x, y);
+				cell.button().addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						switch(e.getButton()) {
+						case MouseEvent.BUTTON1:
+							if (cell.isFlagged()) return;
+
+							generateMines(cell);
+							generateValues();
+							break;
+						case MouseEvent.BUTTON3:
+							ImageIcon newIcon = cell.isFlagged() ? new ImageIcon("Images/facingDown.png") : new ImageIcon("Images/flagged.png");
+							cell.toggleIsFlagged();
+							cell.button().setIcon(newIcon);
+							break;
+						}
+					}
+				});
 				cells.add(cell);
-				frame.add(cell.button());
+				panel.add(cell.button());
 			}
 		}
-		frame.setLayout(new GridLayout(this.height, this.width, 5, 5));
-		frame.setSize(1000, 700);
+		Frame frame = new Frame(panelSize[0] + 100, panelSize[1] + 100);
+		frame.add(panel);
 		frame.setVisible(true);
 		
-		generateMines(startingCell);
-		generateValues();
+	}
+	private int[] calculatePanelSize() {
+		final int MAX_WIDTH = 1400;
+		final int MAX_HEIGHT = 1020;
+		int panelWidth;
+		int panelHeight;
+
+		if (this.width >= this.height) {
+			int scale = this.width / this.height;
+			panelWidth = MAX_WIDTH;
+			panelHeight = panelWidth / scale;
+		}
+		else {
+			int scale = this.height / this.width;
+			panelHeight = MAX_HEIGHT;
+			panelWidth = panelHeight / scale;
+		}
+		int[] size = {panelWidth, panelHeight};
+		return size;
 	}
 	public void print() {
 		int testint = 0;
@@ -88,7 +133,35 @@ public class Map {
 			boolean isStartingCell = rndCell.equals(startingCell);
 			boolean isMine = rndCell.isMine();
 
-			if (!isMine && !isStartingCell) rndCell.setType(CellType.mine);
+			if (!isMine && !isStartingCell) {
+				rndCell.setType(CellType.mine);
+				rndCell.setRevealedIcon(new ImageIcon("Images/bomb.png"));
+				rndCell.button().addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						switch (e.getButton()) {
+						case MouseEvent.BUTTON1:
+							System.out.println(rndCell.isFlagged());
+							if (rndCell.isFlagged()) return;
+							
+							JOptionPane.showMessageDialog(null, "you have lost");
+							for (Cell cell : cells) {
+								if (!cell.isFlagged()) {
+									ImageIcon revealedIcon = cell.revealedIcon();
+									cell.button().setIcon(revealedIcon);
+								}
+							}
+							break;
+						case MouseEvent.BUTTON3:
+							System.out.println(rndCell.isFlagged());
+							ImageIcon newIcon = rndCell.isFlagged() ? new ImageIcon("Images/facingDown.png") : new ImageIcon("Images/flagged.png");
+							rndCell.toggleIsFlagged();
+							rndCell.button().setIcon(newIcon);
+							break;
+						}
+					}
+				});
+			}
 		}
 	}
 	private void generateValues() {

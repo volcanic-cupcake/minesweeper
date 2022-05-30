@@ -11,7 +11,7 @@ public class Frame extends JFrame {
 	JButton button;
 	JButton button2;
 	
-	Frame() {
+	Frame(int width, int height) {
 
 		/*button2 = new JButton();
 		button2.addMouseListener(new MouseAdapter() {
@@ -22,6 +22,9 @@ public class Frame extends JFrame {
 			}
 		});*/
 		super();
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(Frame.EXIT_ON_CLOSE);
+		this.setLayout(null);
+		this.setSize(width, height);
+
 	}
 }
