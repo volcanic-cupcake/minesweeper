@@ -18,6 +18,7 @@ public class Cell {
 	private CellType type = null;
 	private ImageIcon revealedIcon = null;
 	private int value = 0;
+	private boolean isClicked = false;
 	private boolean isFlagged = false;
 	
 	public Cell(int x, int y) {
@@ -50,6 +51,9 @@ public class Cell {
 	public int value() {
 		return this.value;
 	}
+	public boolean isClicked() {
+		return this.isClicked;
+	}
 	public boolean isFlagged() {
 		return this.isFlagged;
 	}
@@ -78,6 +82,9 @@ public class Cell {
 	public void setValue(int value) {
 		this.value = value;
 	}
+	public void setIsClicked(boolean isClicked) {
+		this.isClicked = isClicked;
+	}
 	public void setIsFlagged(boolean isFlagged) {
 		this.isFlagged = isFlagged;
 	}
@@ -87,7 +94,6 @@ public class Cell {
 	public boolean isMine() {
 		return this.type == CellType.mine;
 	}
-	
 	public boolean equals(Cell cell) {
 		boolean identicalX = this.x == cell.x();
 		boolean identicalY = this.y == cell.y();
