@@ -79,9 +79,24 @@ public class Map {
 	}
 	public void generate(Cell startingCell) {
 		JPanel panel = new JPanel();
-		int[] panelSize = calculatePanelSize();
-		panel.setLayout(new GridLayout(this.height, this.width, 5, 5));
-		panel.setBounds(25, 25, panelSize[0], panelSize[1]);
+		PanelSize panelSize = calculatePanelSize();
+
+		int hgap = 5;
+		int vgap = 5;
+
+		int hgapNum = this.width - 1;
+		int vgapNum = this.height - 1;
+
+		int totalHgap = hgapNum * hgap;
+		int totalVgap = vgapNum * vgap;
+
+		int buttonWidth = (panelSize.width() - totalHgap) / this.width;
+		int buttonHeight = (panelSize.height() - totalVgap) / this.height;
+		Button.width = buttonWidth;
+		Button.height = buttonHeight;
+
+		panel.setLayout(new GridLayout(this.height, this.width, hgap, vgap));
+		panel.setBounds(25, 25, panelSize.width(), panelSize.height());
 		
 		cells = new ArrayList<Cell>();
 		for (int y = 0; y < this.height; y++) {
@@ -98,23 +113,24 @@ public class Map {
 							generateValues();
 							break;
 						case MouseEvent.BUTTON3:
-							ImageIcon newIcon = cell.isFlagged() ? new ImageIcon("Images/facingDown.png") : new ImageIcon("Images/flagged.png");
+							CellPicture newIcon = cell.isFlagged() ? CellPicture.facingDown : CellPicture.flagged;
 							cell.toggleIsFlagged();
-							cell.button().setIcon(newIcon);
+							cell.button().setIcon(newIcon.path);
 							break;
 						}
 					}
 				});
 				cells.add(cell);
+				cell.button().setIcon(CellPicture.facingDown.path);
 				panel.add(cell.button());
 			}
 		}
-		Frame frame = new Frame(panelSize[0] + 100, panelSize[1] + 100);
+		Frame frame = new Frame(panelSize.width() + 100, panelSize.height() + 100);
 		frame.add(panel);
 		frame.setVisible(true);
 		
 	}
-	private int[] calculatePanelSize() {
+	private PanelSize calculatePanelSize() {
 		final int MAX_WIDTH = 1400;
 		final int MAX_HEIGHT = 1020;
 		int panelWidth;
@@ -130,7 +146,7 @@ public class Map {
 			panelHeight = MAX_HEIGHT;
 			panelWidth = panelHeight / scale;
 		}
-		int[] size = {panelWidth, panelHeight};
+		PanelSize size = new PanelSize(panelWidth, panelHeight);
 		return size;
 	}
 	public void print() {
@@ -154,7 +170,7 @@ public class Map {
 		for (Cell neighbor : neighbors) {
 			if (neighbor.isClicked()) continue;
 
-			neighbor.button().setIcon( neighbor.revealedIcon() );
+			neighbor.button().setIcon( neighbor.revealedIcon().path );
 			neighbor.setIsClicked(true);
 			if (neighbor.type() == CellType.blank) chainBlanks(neighbor);
 		}
@@ -170,27 +186,27 @@ public class Map {
 
 			if (!isMine && !isStartingCell) {
 				rndCell.setType(CellType.mine);
-				rndCell.setRevealedIcon(new ImageIcon("Images/bomb.png"));
+				rndCell.setRevealedIcon(CellPicture.mine);
 				rndCell.button().setMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {
 						switch (e.getButton()) {
 						case MouseEvent.BUTTON1:
-							if (rndCell.isFlagged()) return;
+							if (rndCell.isFlagged() || rndCell.isClicked()) return;
 							
 							JOptionPane.showMessageDialog(null, "you have lost");
 							for (Cell cell : cells) {
-								if (!cell.isFlagged()) {
-									ImageIcon revealedIcon = cell.revealedIcon();
-									cell.button().setIcon(revealedIcon);
-								}
+								if (cell.isFlagged()) continue;
+
+								CellPicture revealedIcon = cell.revealedIcon();
+								cell.button().setIcon(revealedIcon.path);
 							}
 							rndCell.setIsClicked(true);
 							break;
 						case MouseEvent.BUTTON3:
-							ImageIcon newIcon = rndCell.isFlagged() ? new ImageIcon("Images/facingDown.png") : new ImageIcon("Images/flagged.png");
+							CellPicture newIcon = rndCell.isFlagged() ? CellPicture.facingDown : CellPicture.flagged;
 							rndCell.toggleIsFlagged();
-							rndCell.button().setIcon(newIcon);
+							rndCell.button().setIcon(newIcon.path);
 							break;
 						}
 					}
@@ -210,21 +226,21 @@ public class Map {
 			
 			if (value == 0) {
 				cell.setType(CellType.blank);
-				cell.setRevealedIcon(new ImageIcon("Images/0.png"));
+				cell.setRevealedIcon(CellPicture.c0);
 				cell.button().setMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {
 						switch (e.getButton()) {
 						case MouseEvent.BUTTON1:
-							if (cell.isFlagged()) return;
+							if (cell.isFlagged() || cell.isClicked()) return;
 							
 							cell.setIsClicked(true);
 							chainBlanks(cell);
 							break;
 						case MouseEvent.BUTTON3:
-							ImageIcon newIcon = cell.isFlagged() ? new ImageIcon("Images/facingDown.png") : new ImageIcon("Images/flagged.png");
+							CellPicture newIcon = cell.isFlagged() ? CellPicture.facingDown : CellPicture.flagged;
 							cell.toggleIsFlagged();
-							cell.button().setIcon(newIcon);
+							cell.button().setIcon(newIcon.path);
 							break;
 						}
 					}
@@ -233,21 +249,46 @@ public class Map {
 			else {
 				cell.setType(CellType.normal);
 				cell.setValue(value);
-				cell.setRevealedIcon(new ImageIcon("Images/" + value + ".png"));
+				switch(value) {
+				case 1:
+					cell.setRevealedIcon(CellPicture.c1);
+					break;
+				case 2:
+					cell.setRevealedIcon(CellPicture.c2);
+					break;
+				case 3:
+					cell.setRevealedIcon(CellPicture.c3);
+					break;
+				case 4:
+					cell.setRevealedIcon(CellPicture.c4);
+					break;
+				case 5:
+					cell.setRevealedIcon(CellPicture.c5);
+					break;
+				case 6:
+					cell.setRevealedIcon(CellPicture.c6);
+					break;
+				case 7:
+					cell.setRevealedIcon(CellPicture.c7);
+					break;
+				case 8:
+					cell.setRevealedIcon(CellPicture.c8);
+					break;
+				}
 				cell.button().setMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {
 						switch (e.getButton()) {
 						case MouseEvent.BUTTON1:
-							if (cell.isFlagged()) return;
+							if (cell.isFlagged() || cell.isClicked()) return;
 							
 							cell.setIsClicked(true);
 							//stuff when clicked
 							break;
 						case MouseEvent.BUTTON3:
-							ImageIcon newIcon = cell.isFlagged() ? new ImageIcon("Images/facingDown.png") : new ImageIcon("Images/flagged.png");
+							CellPicture newIcon = cell.isFlagged() ? CellPicture.facingDown : CellPicture.flagged;
 							cell.toggleIsFlagged();
-							cell.button().setIcon(newIcon);
+							cell.button().setIcon(newIcon.path);
 							break;
 						}
 					}

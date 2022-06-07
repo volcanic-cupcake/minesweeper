@@ -16,7 +16,7 @@ public class Cell {
 	private int y;
 	private Button button = new Button();
 	private CellType type = null;
-	private ImageIcon revealedIcon = null;
+	private CellPicture revealedIcon = null;
 	private int value = 0;
 	private boolean isClicked = false;
 	private boolean isFlagged = false;
@@ -45,7 +45,7 @@ public class Cell {
 	public CellType type() {
 		return this.type;
 	}
-	public ImageIcon revealedIcon() {
+	public CellPicture revealedIcon() {
 		return this.revealedIcon;
 	}
 	public int value() {
@@ -76,7 +76,7 @@ public class Cell {
 			break;
 		}
 	}
-	public void setRevealedIcon(ImageIcon revealedIcon) {
+	public void setRevealedIcon(CellPicture revealedIcon) {
 		this.revealedIcon = revealedIcon;
 	}
 	public void setValue(int value) {
