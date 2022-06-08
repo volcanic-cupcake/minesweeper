@@ -77,7 +77,7 @@ public class Map {
 			}
 			return neighbors;
 	}
-	public void generate(Cell startingCell) {
+	public void generate() {
 		JPanel panel = new JPanel();
 		PanelSize panelSize = calculatePanelSize();
 
@@ -111,6 +111,12 @@ public class Map {
 
 							generateMines(cell);
 							generateValues();
+
+							cell.button().setIcon( cell.revealedIcon().path );
+							List<Cell> neighbors = getNeighbors(cell);
+							for (Cell neighbor : neighbors) {
+								if (neighbor.type() == CellType.blank) chainBlanks(neighbor);
+							}
 							break;
 						case MouseEvent.BUTTON3:
 							CellPicture newIcon = cell.isFlagged() ? CellPicture.facingDown : CellPicture.flagged;
@@ -283,7 +289,11 @@ public class Map {
 							if (cell.isFlagged() || cell.isClicked()) return;
 							
 							cell.setIsClicked(true);
-							//stuff when clicked
+							cell.button().setIcon( cell.revealedIcon().path );
+							List<Cell> neighbors = getNeighbors(cell);
+							for (Cell neighbor : neighbors) {
+								if (neighbor.type() == CellType.blank) chainBlanks(neighbor);
+							}
 							break;
 						case MouseEvent.BUTTON3:
 							CellPicture newIcon = cell.isFlagged() ? CellPicture.facingDown : CellPicture.flagged;
@@ -295,5 +305,6 @@ public class Map {
 				});
 			}
 		}
+		this.print(); //delete this later
 	}
 }
